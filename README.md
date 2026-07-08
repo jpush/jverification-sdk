@@ -102,13 +102,13 @@ import JVerification
        }
 
        private func configureOnLaunch() {
-           let collectControl = JVCollectControl()
-           collectControl.cell = false
-           JVERIFICATIONService.setCollectControl(collectControl)
-
            #if DEBUG
            JVERIFICATIONService.setDebug(true)
            #endif
+
+           let collectControl = JVCollectControl()
+           collectControl.cell = false
+           JVERIFICATIONService.setCollectControl(collectControl)
 
            let config = JVAuthConfig()
            config.appKey = "替换成你的 AppKey"
