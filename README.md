@@ -56,9 +56,85 @@ JVerification
 
 6. 确认 App Target 已同时链接 `JCore` 和 `JVerification`。
 
+### Swift 项目调用说明
+
+使用 SPM 接入后，Swift 代码中不要直接写：
+
+```swift
+import JVerification
+```
+
+当前 SPM 产物会完成 SDK 二进制链接，但 `JVERIFICATIONService.h` 没有以 Swift 可直接 `import JVerification` 的模块形式暴露。Swift App 需要通过 Objective-C Bridging Header 引入 SDK 头文件。
+
+1. 在 App Target 中新增桥接头文件，例如：
+
+   ```text
+   YourApp/YourApp-Bridging-Header.h
+   ```
+
+2. 在桥接头文件中引入认证 SDK 头文件：
+
+   ```objc
+   #import "JVERIFICATIONService.h"
+   ```
+
+3. 在 App Target 的 `Build Settings` 中设置：
+
+   ```text
+   Objective-C Bridging Header = YourApp/YourApp-Bridging-Header.h
+   ```
+
+4. 在 Swift 初始化阶段调用 SDK。SwiftUI App 可以参考：
+
+   ```swift
+   import SwiftUI
+   import UIKit
+
+   final class AppDelegate: NSObject, UIApplicationDelegate {
+       func application(
+           _ application: UIApplication,
+           didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+       ) -> Bool {
+           configureJVerification()
+           return true
+       }
+
+       private func configureJVerification() {
+           let collectControl = JVCollectControl()
+           collectControl.cell = false
+           JVERIFICATIONService.setCollectControl(collectControl)
+
+           let config = JVAuthConfig()
+           config.appKey = "替换成你的 AppKey"
+           config.channel = "App Store"
+           config.isProduction = false
+           config.timeout = 5000
+           config.authBlock = { result in
+               print("JVerification setup result: \(result)")
+           }
+
+           JVERIFICATIONService.setDebug(true)
+           JVERIFICATIONService.setup(with: config)
+       }
+   }
+
+   @main
+   struct YourApp: App {
+       @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
+       var body: some Scene {
+           WindowGroup {
+               ContentView()
+           }
+       }
+   }
+   ```
+
+正式发布时，请将 `config.appKey` 替换为真实 AppKey，并按环境设置 `config.isProduction`。`JVERIFICATIONService.setDebug(true)` 建议仅在调试阶段开启。
+
 ### Package.swift 示例
 
-如果业务 App 自己也是 Swift Package，可以参考：
+如果业务工程通过 `Package.swift` 管理依赖，可以参考：
 
 ```swift
 dependencies: [
@@ -77,6 +153,8 @@ targets: [
 ```
 
 `from: "5.4.0"` 表示允许 Swift Package Manager 在兼容范围内解析 JCore 的最新版本，不是固定到 `5.4.0`。
+
+上面的示例只表示依赖和链接关系。Swift 源码中调用认证 SDK 时，仍需按上一节通过 App Target 的 Objective-C Bridging Header 引入 `JVERIFICATIONService.h`。
 
 ## CocoaPods 接入
 
