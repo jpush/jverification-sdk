@@ -88,21 +88,27 @@ import JVerification
 
    ```swift
    import SwiftUI
-   import UIKit
 
-   final class AppDelegate: NSObject, UIApplicationDelegate {
-       func application(
-           _ application: UIApplication,
-           didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
-       ) -> Bool {
-           configureJVerification()
-           return true
+   @main
+   struct YourApp: App {
+       init() {
+           configureOnLaunch()
        }
 
-       private func configureJVerification() {
+       var body: some Scene {
+           WindowGroup {
+               ContentView()
+           }
+       }
+
+       private func configureOnLaunch() {
            let collectControl = JVCollectControl()
            collectControl.cell = false
            JVERIFICATIONService.setCollectControl(collectControl)
+
+           #if DEBUG
+           JVERIFICATIONService.setDebug(true)
+           #endif
 
            let config = JVAuthConfig()
            config.appKey = "替换成你的 AppKey"
@@ -113,19 +119,7 @@ import JVerification
                print("JVerification setup result: \(result)")
            }
 
-           JVERIFICATIONService.setDebug(true)
            JVERIFICATIONService.setup(with: config)
-       }
-   }
-
-   @main
-   struct YourApp: App {
-       @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-
-       var body: some Scene {
-           WindowGroup {
-               ContentView()
-           }
        }
    }
    ```
