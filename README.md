@@ -106,10 +106,6 @@ import JVerification
            JVERIFICATIONService.setDebug(true)
            #endif
 
-           let collectControl = JVCollectControl()
-           collectControl.cell = false
-           JVERIFICATIONService.setCollectControl(collectControl)
-
            let config = JVAuthConfig()
            config.appKey = "替换成你的 AppKey"
            config.channel = "App Store"
